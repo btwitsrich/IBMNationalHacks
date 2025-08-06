@@ -28,11 +28,7 @@ pipeline {
         }
     }
 
-
-
-    
-
-                                                // Add this stage
+   // ✅ OWASP stage must be *inside* the `stages` block
         stage('OWASP Dependency-Check') {
             steps {
                 bat '''
@@ -45,7 +41,6 @@ pipeline {
             }
         }
     }
-
 
     post {
         success {
