@@ -2,14 +2,16 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven 3.8.8'  // Use the name of the Maven installation you configured in Jenkins
-        jdk 'JDK 17'         // Use the JDK name installed/configured in Jenkins
+        maven 'Maven 3.8.8'
+        jdk 'JDK 17'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/btwitsrich/your-repo.git'
+                git url: 'https://github.com/btwitsrich/IBMNationalHacks.git',
+                    branch: 'master',
+                    credentialsId: 'github-pat' // Use the actual ID from Jenkins Credentials
             }
         }
 
@@ -34,4 +36,4 @@ pipeline {
             echo 'Something went wrong with the build.'
         }
     }
-} 
+}
