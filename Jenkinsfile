@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven 3.8.8'  // Use the name of the Maven installation you configured in Jenkins
-        jdk 'JDK 17'         // Use the JDK name installed/configured in Jenkins
-    }
-
     stages {
         stage('Checkout') {
             steps {
