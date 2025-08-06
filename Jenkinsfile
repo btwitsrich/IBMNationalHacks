@@ -42,6 +42,15 @@ pipeline {
     post {
         success {
             echo 'Build and tests completed successfully.'
+            
+             publishHTML(target: [
+                reportDir: 'dependency-check-report',
+                reportFiles: 'dependency-check-report.html',
+                reportName: 'OWASP Dependency-Check Report',
+                allowMissing: false,
+                alwaysLinkToLastBuild: true,
+                keepAll: true
+            ])
         }
         failure {
             echo 'Something went wrong with the build.'
