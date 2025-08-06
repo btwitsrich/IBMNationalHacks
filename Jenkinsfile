@@ -1,3 +1,4 @@
+
 pipeline {
     agent any
 
@@ -9,7 +10,8 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/btwitsrich/IBMNationalHacks.git', branch: 'master'
+                git url: 'https://github.com/btwitsrich/IBMNationalHacks.git',
+                    branch: 'master'
             }
         }
 
@@ -24,23 +26,33 @@ pipeline {
                 bat 'mvn test'
             }
         }
+    }
 
+
+
+    
+
+                                                // Add this stage
         stage('OWASP Dependency-Check') {
             steps {
                 bat '''
-                    cd C:\\OWASP\\dependency-check
-                    dependency-check.bat --project "IBMNationalHacks" --scan "C:\\ProgramData\\Jenkins\\.jenkins\\workspace\\Maven Jenkins Pipeline@2" --format HTML --out "C:\\OWASP\\dependency-check\\report"
+                    "C:\\Tools\\dependency-check\\bin\\dependency-check.bat" ^
+                    --project "IBMNationalHacks" ^
+                    --scan "." ^
+                    --format "HTML" ^
+                    --out "dependency-check-report"
                 '''
             }
         }
     }
 
+
     post {
         success {
-            echo 'Build and security checks passed.'
-        }
+            echo 'Build and tests completed successfully.'
+    }
         failure {
-            echo 'Something went wrong with the build or scan.'
-        }
+            echo 'Something went wrong with the build.'
     }
 }
+
