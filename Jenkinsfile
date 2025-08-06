@@ -1,4 +1,3 @@
-
 pipeline {
     agent any
 
@@ -10,8 +9,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/btwitsrich/IBMNationalHacks.git',
-                    branch: 'master'
+                git 'https://github.com/btwitsrich/IBMNationalHacks.git'
             }
         }
 
@@ -26,9 +24,8 @@ pipeline {
                 bat 'mvn test'
             }
         }
-    }
 
-   // ✅ OWASP stage must be *inside* the `stages` block
+        // ✅ OWASP stage must be *inside* the `stages` block
         stage('OWASP Dependency-Check') {
             steps {
                 bat '''
@@ -45,9 +42,9 @@ pipeline {
     post {
         success {
             echo 'Build and tests completed successfully.'
-    }
+        }
         failure {
             echo 'Something went wrong with the build.'
+        }
     }
 }
-
