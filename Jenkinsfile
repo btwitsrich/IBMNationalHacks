@@ -10,20 +10,19 @@ pipeline {
         stage('Checkout') {
             steps {
                 git url: 'https://github.com/btwitsrich/IBMNationalHacks.git',
-                    branch: 'master',
-                    credentialsId: 'github-pat' // Use the actual ID from Jenkins Credentials
+                    branch: 'master'
             }
         }
 
         stage('Build') {
             steps {
-                sh 'mvn clean install'
+                bat 'mvn clean install'
             }
         }
 
         stage('Test') {
             steps {
-                sh 'mvn test'
+                bat 'mvn test'
             }
         }
     }
