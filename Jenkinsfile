@@ -104,7 +104,7 @@ pipeline {
 
         stage('Convert Report to CSV') {
             steps {
-                writeFile file: 'parse_json_to_csv.py', text: '''
+                writeFile file: 'Python3 parse_json_to_csv.py', text: '''
 import json
 import csv
 
@@ -134,7 +134,7 @@ with open("dependency-check-report/dependency-evidence.csv", "w", newline="", en
     writer.writerow(["File Name", "File Path", "Evidence Type", "Source", "Name", "Value", "Confidence"])
     writer.writerows(rows)
                 '''
-                bat '"C:\\Python312\\python.exe" parse_json_to_csv.py'
+                bat '"C:\\Python312\\python.exe" python3 parse_json_to_csv.py'
             }
         }
     }
