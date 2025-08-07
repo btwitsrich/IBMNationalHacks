@@ -78,106 +78,40 @@ pipeline {
             }
         }
 
-
-        stage('Install Python (if not present)') {
+        stage('Generate Vulnerability Chart') {
             steps {
-                powershell '''
-                $ErrorActionPreference = "Stop"
-
-                $pythonPath = "C:\\\\Python312\\\\python.exe"
-
-                if (-Not (Test-Path $pythonPath)) {
-                    Write-Output "⚙️ Python not found. Installing now..."
-
-                    $pythonInstallerUrl = "https://www.python.org/ftp/python/3.12.2/python-3.12.2-amd64.exe"
-                    $installerPath = "$env:TEMP\\\\python-installer.exe"
-
-                    Invoke-WebRequest -Uri $pythonInstallerUrl -OutFile $installerPath
-
-                    Start-Process -FilePath $installerPath -ArgumentList "/quiet InstallAllUsers=1 TargetDir=C:\\\\Python312 PrependPath=0" -Wait
-                } else {
-                    Write-Output " Python already installed at $pythonPath"
-                }
-                '''
-            }
-        }
-
-        stage('Convert Report to CSV') {
-            steps {
-                writeFile file: 'Python3 parse_json_to_csv.py', text: '''
-import json
-import csv
-
-with open("dependency-check-report/dependency-check-report.json", "r") as f:
-    data = json.load(f)
-
-rows = []
-
-for dependency in data.get("dependencies", []):
-    fileName = dependency.get("fileName", "")
-    filePath = dependency.get("filePath", "")
-    for evidence in dependency.get("evidenceCollected", []):
-        evidenceType = evidence.get("type", "")
-        for item in evidence.get("evidence", []):
-            rows.append([
-                fileName,
-                filePath,
-                evidenceType,
-                item.get("source", ""),
-                item.get("name", ""),
-                item.get("value", ""),
-                item.get("confidence", "")
-            ])
-
-with open("dependency-check-report/dependency-evidence.csv", "w", newline="", encoding="utf-8") as csvfile:
-    writer = csv.writer(csvfile)
-    writer.writerow(["File Name", "File Path", "Evidence Type", "Source", "Name", "Value", "Confidence"])
-    writer.writerows(rows)
-                '''
-                bat '"C:\\Python312\\python.exe" python3 parse_json_to_csv.py'
-            }
-        }
-    }
-
-
-stage('Generate Vulnerability Chart') {
-    steps {
-        writeFile file: 'generate_chart.py', text: '''
+                writeFile file: 'generate_chart.py', text: '''
 import json
 import matplotlib.pyplot as plt
 
-# Load report
 with open("dependency-check-report/dependency-check-report.json", "r") as f:
     data = json.load(f)
 
-# Count severities
 severity_count = {"Low": 0, "Medium": 0, "High": 0, "Critical": 0}
 
-for dependency in data.get("dependencies", []):
-    for vuln in dependency.get("vulnerabilities", []):
-        severity = vuln.get("severity", "Unknown")
+for dep in data.get("dependencies", []):
+    for vuln in dep.get("vulnerabilities", []):
+        severity = vuln.get("severity", "")
         if severity in severity_count:
             severity_count[severity] += 1
 
-# Plot
 plt.figure(figsize=(8, 5))
-plt.bar(severity_count.keys(), severity_count.values())
+plt.bar(severity_count.keys(), severity_count.values(), color=["#5bc0de", "#f0ad4e", "#d9534f", "#800000"])
 plt.title("Vulnerabilities by Severity")
 plt.xlabel("Severity")
 plt.ylabel("Count")
 plt.tight_layout()
 plt.savefig("dependency-check-report/vuln_chart.png")
 '''
-        bat '"C:\\Python312\\python.exe" generate_chart.py'
+                bat '"C:\\Python312\\python.exe" generate_chart.py'
+            }
+        }
     }
-}
-
-
 
     post {
         success {
-            echo ' Build and reports generated successfully.'
-
+            echo ' Build completed successfully!'
+            archiveArtifacts artifacts: 'dependency-check-report/vuln_chart.png', fingerprint: true
             publishHTML(target: [
                 reportDir: 'dependency-check-report',
                 reportFiles: 'dependency-check-report.html',
