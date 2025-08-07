@@ -79,6 +79,48 @@ pipeline {
         }
     }
 
+
+
+
+
+
+    stage('Convert Report to CSV') {
+    steps {
+        writeFile file: 'parse_json_to_csv.py', text: '''
+import json
+import csv
+
+with open("dependency-check-report/dependency-check-report.json", "r") as f:
+    data = json.load(f)
+
+rows = []
+
+for dependency in data.get("dependencies", []):
+    fileName = dependency.get("fileName", "")
+    filePath = dependency.get("filePath", "")
+    for evidence in dependency.get("evidenceCollected", []):
+        evidenceType = evidence.get("type", "")
+        for item in evidence.get("evidence", []):
+            rows.append([
+                fileName,
+                filePath,
+                evidenceType,
+                item.get("source", ""),
+                item.get("name", ""),
+                item.get("value", ""),
+                item.get("confidence", "")
+            ])
+
+with open("dependency-check-report/dependency-evidence.csv", "w", newline="", encoding="utf-8") as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerow(["File Name", "File Path", "Evidence Type", "Source", "Name", "Value", "Confidence"])
+    writer.writerows(rows)
+        '''
+        bat 'python parse_json_to_csv.py'
+    }
+}
+
+
     post {
         success {
             echo 'Build and tests completed successfully.'
