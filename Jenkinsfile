@@ -53,11 +53,11 @@ pipeline {
                         #container {
                             max-width: 1200px;
                             width: 100%;
-                            text-align: center; /* Center align the text */
+                            text-align: center;
                         }
                         a {
-                            color: blue; /* Set the link color to blue */
-                            text-decoration: underline; /* Optional: underline links */
+                            color: blue;
+                            text-decoration: underline;
                         }
                     </style>
                     <script>
@@ -70,23 +70,17 @@ pipeline {
                             <span style="color: #007bff;">August 2025</span>
                         </p>
                         <p>
-                            <a href="https://cloud.ibm.com" target="_blank">Visit IBM Cloud</a> <!-- Link to IBM Cloud -->
+                            <a href="https://cloud.ibm.com" target="_blank">Visit IBM Cloud</a>
                         </p>
                     </footer>
                 '''
                 bat 'type dependency-check-report\\custom-style.html >> dependency-check-report\\dependency-check-report.html'
             }
         }
-    }
 
-
-
-
-
-
-    stage('Convert Report to CSV') {
-    steps {
-        writeFile file: 'parse_json_to_csv.py', text: '''
+        stage('Convert Report to CSV') {
+            steps {
+                writeFile file: 'parse_json_to_csv.py', text: '''
 import json
 import csv
 
@@ -115,15 +109,15 @@ with open("dependency-check-report/dependency-evidence.csv", "w", newline="", en
     writer = csv.writer(csvfile)
     writer.writerow(["File Name", "File Path", "Evidence Type", "Source", "Name", "Value", "Confidence"])
     writer.writerows(rows)
-        '''
-        bat 'python parse_json_to_csv.py'
+                '''
+                bat 'python parse_json_to_csv.py'
+            }
+        }
     }
-}
-
 
     post {
         success {
-            echo 'Build and tests completed successfully.'
+            echo '✅ Build and tests completed successfully.'
 
             publishHTML(target: [
                 reportDir: 'dependency-check-report',
@@ -133,9 +127,12 @@ with open("dependency-check-report/dependency-evidence.csv", "w", newline="", en
                 alwaysLinkToLastBuild: true,
                 keepAll: true
             ])
+
+            archiveArtifacts artifacts: 'dependency-check-report/dependency-evidence.csv', fingerprint: true
         }
+
         failure {
-            echo 'Something went wrong with the build.'
+            echo '❌ Something went wrong with the build.'
         }
     }
 }
