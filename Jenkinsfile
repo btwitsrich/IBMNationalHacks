@@ -139,6 +139,41 @@ with open("dependency-check-report/dependency-evidence.csv", "w", newline="", en
         }
     }
 
+
+stage('Generate Vulnerability Chart') {
+    steps {
+        writeFile file: 'generate_chart.py', text: '''
+import json
+import matplotlib.pyplot as plt
+
+# Load report
+with open("dependency-check-report/dependency-check-report.json", "r") as f:
+    data = json.load(f)
+
+# Count severities
+severity_count = {"Low": 0, "Medium": 0, "High": 0, "Critical": 0}
+
+for dependency in data.get("dependencies", []):
+    for vuln in dependency.get("vulnerabilities", []):
+        severity = vuln.get("severity", "Unknown")
+        if severity in severity_count:
+            severity_count[severity] += 1
+
+# Plot
+plt.figure(figsize=(8, 5))
+plt.bar(severity_count.keys(), severity_count.values())
+plt.title("Vulnerabilities by Severity")
+plt.xlabel("Severity")
+plt.ylabel("Count")
+plt.tight_layout()
+plt.savefig("dependency-check-report/vuln_chart.png")
+'''
+        bat '"C:\\Python312\\python.exe" generate_chart.py'
+    }
+}
+
+
+
     post {
         success {
             echo ' Build and reports generated successfully.'
