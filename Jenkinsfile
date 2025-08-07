@@ -77,47 +77,12 @@ pipeline {
                 bat 'type dependency-check-report\\custom-style.html >> dependency-check-report\\dependency-check-report.html'
             }
         }
-
-        stage('Generate Vulnerability Chart') {
-            steps {
-                script {
-                    writeFile file: 'generate_chart.py', text: '''
-import json
-import matplotlib.pyplot as plt
-
-with open("dependency-check-report/dependency-check-report.json", "r") as f:
-    data = json.load(f)
-
-severity_count = {"Low": 0, "Medium": 0, "High": 0, "Critical": 0}
-
-for dep in data.get("dependencies", []):
-    for vuln in dep.get("vulnerabilities", []):
-        severity = vuln.get("severity", "")
-        if severity in severity_count:
-            severity_count[severity] += 1
-
-plt.figure(figsize=(8, 5))
-plt.bar(severity_count.keys(), severity_count.values(), color=["#5bc0de", "#f0ad4e", "#d9534f", "#800000"])
-plt.title("Vulnerabilities by Severity")
-plt.xlabel("Severity")
-plt.ylabel("Count")
-plt.tight_layout()
-plt.savefig("dependency-check-report/vuln_chart.png")
-'''
-                    try {
-                        bat '"C:\\Python312\\python.exe" generate_chart.py'
-                    } catch (Exception e) {
-                        error "Chart generation failed: ${e.message}. Please check your Python installation."
-                    }
-                }
-            }
-        }
     }
 
     post {
         success {
             echo 'Build completed successfully!'
-            archiveArtifacts artifacts: 'dependency-check-report/vuln_chart.png', fingerprint: true
+            archiveArtifacts artifacts: 'dependency-check-report/*', fingerprint: true
             publishHTML(target: [
                 reportDir: 'dependency-check-report',
                 reportFiles: 'dependency-check-report.html',
