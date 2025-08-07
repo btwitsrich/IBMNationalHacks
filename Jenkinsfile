@@ -108,19 +108,19 @@ with open("dependency-check-report/dependency-evidence.csv", "w", newline="", en
             powershell '''
             $ErrorActionPreference = "Stop"
 
-            $pythonPath = "C:\\Python312\\python.exe"
+            $pythonPath = "C:\\\\Python312\\\\python.exe"
 
             # Check if Python is already installed at that location
             if (-Not (Test-Path $pythonPath)) {
             Write-Output "⚙️ Python not found. Installing now..."
 
             $pythonInstallerUrl = "https://www.python.org/ftp/python/3.12.2/python-3.12.2-amd64.exe"
-            $installerPath = "$env:TEMP\\python-installer.exe"
+            $installerPath = "$env:TEMP\\\\python-installer.exe"
 
             Invoke-WebRequest -Uri $pythonInstallerUrl -OutFile $installerPath
 
             # Install Python silently to C:\Python312
-            Start-Process -FilePath $installerPath -ArgumentList "/quiet InstallAllUsers=1 TargetDir=C:\\Python312 PrependPath=0" -Wait
+            Start-Process -FilePath $installerPath -ArgumentList "/quiet InstallAllUsers=1 TargetDir=C:\\\\Python312 PrependPath=0" -Wait
         } else {
             Write-Output "✅ Python already installed at $pythonPath"
         }
