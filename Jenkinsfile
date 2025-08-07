@@ -119,7 +119,7 @@ with open("dependency-check-report/dependency-evidence.csv", "w", newline="", en
 
             Invoke-WebRequest -Uri $pythonInstallerUrl -OutFile $installerPath
 
-            # Install Python silently to C:\Python312
+            # Install Python silently to C:/Python312
             Start-Process -FilePath $installerPath -ArgumentList "/quiet InstallAllUsers=1 TargetDir=C:\\\\Python312 PrependPath=0" -Wait
         } else {
             Write-Output "✅ Python already installed at $pythonPath"
